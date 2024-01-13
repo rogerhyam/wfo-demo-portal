@@ -12,3 +12,10 @@ define('SOLR_QUERY_URI', 'http://localhost:8983/solr/wfo');
 // trouble themselves with many versions of backbone
 // will normally be set to the most recent.
 define('WFO_DEFAULT_VERSION','2023-12');
+
+// an ordered list of the facets we want 
+// displayed
+$facet_q_numbers = array(
+    "Q6256", // country
+    "Q2355817" // plant life-form
+);

@@ -11,13 +11,14 @@ require_once('header.php');
 
 ?>
 <form method="GET" action="index.php" id="main_form">
-    <h2>Taxon Search</h2>
-    <input type="text" name="search" placeholder="Type a taxon name" style="width: 80%;"
+    <h2>Name Search</h2>
+    <input type="text" name="search" placeholder="Type a plant name" style="width: 80%;"
         onkeyup="search_param_change(this)" />
     <input type="submit" value="Search" />
 
     <div id="search_results">
-        <p>Taxonomic searching is most common.</p>
+        <p>Nomeclature searching is more for experts.</p>
+        <p>This search interface returns all names: accepted, synonyms, unplaced and deprecated.</p>
     </div>
 
 </form>
