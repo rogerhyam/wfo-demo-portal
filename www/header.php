@@ -15,6 +15,10 @@
         background-color: yellow;
     }
 
+    #search_results {
+        width: 60%;
+    }
+
     #facet_box {
         float: right;
         width: 30%;

@@ -35,7 +35,7 @@ $filters[] = 'role_s:accepted';
 
 // filter by facets selected
 foreach($facet_filters as $facet => $values ){
-    $filters[] = "{$facet}_ss: (" . implode(' ', $values) . ')'; 
+    $filters[] = "{$facet}_ss: (" . implode(' AND ', $values) . ')'; 
 }
 
 // facets for form
@@ -76,5 +76,7 @@ header("Content-Type: application/json");
 // from solr so we can repopulate the form easily.
 $solr_response = $index->getSolrResponse($query);
 $solr_response->getParams = $_GET;
+$solr_response->querySent = $query;
+
 
 echo json_encode($solr_response);
