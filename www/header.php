@@ -14,6 +14,26 @@
     .syn_highlight {
         background-color: yellow;
     }
+
+    #facet_box {
+        float: right;
+        width: 30%;
+        border: solid 1px gray;
+        padding: 1em;
+        margin: 1em;
+    }
+
+    #facet_box h2,
+    #facet_box h3 {
+        margin-top: 0px;
+        margin-bottom: 0.3em;
+    }
+
+    #facet_inputs ul {
+        padding-left: 0px;
+        max-height: 10em;
+        overflow-y: auto;
+    }
     </style>
 </head>
 

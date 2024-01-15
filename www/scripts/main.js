@@ -40,43 +40,91 @@ function search_param_change(input) {
     fetch('json_search_results.php?' + params)
         .then((response) => response.json())
         .then((json) => {
+
             console.log(json);
 
             // populate form
+            const results_wrapper = document.getElementById('search_results');
+            const facets_wrapper = document.getElementById('facet_inputs');
 
             // fill in search results
-            if (json.response && json.response.docs) {
+            if (json.response && json.response.docs && json.response.docs.length > 0) {
 
-                const results_wrapper = document.getElementById('search_results');
-                const params = JSON.parse(json.responseHeader.params.json);
-
-                let search_terms = params.query.replace('all_names_alpha_ss:', '')
-                search_terms = search_terms.replace('*', '');
-                search_terms = search_terms.replace('\\', '');
-                console.log(search_terms);
+                let search_terms = json.getParams.search;
                 const re = new RegExp(search_terms, "g");
 
-                results_wrapper.innerHTML = `<ul>
+                results_wrapper.innerHTML = `<ul style="padding-left: 0px;">
                 ${json.response.docs.map(doc => {
-                    return `<li>
-                        <strong>${doc.full_name_string_html_s}</strong>
-                        <div>
-                        ${doc.all_names_alpha_ss.map(syn => {
-                        // we need to highlight the search 
-                        // terms if they are found in the 
-                        // synonyms
-                        highlighted = syn.replace(re, `<strong class="syn_highlight">${search_terms}</strong>`);
-                        return highlighted;
 
-                    }).join('; ')};
+                    // remove the first one as it is the same as the accepted
+                    doc.all_names_alpha_ss.shift();
+
+                    let syns = "";
+                    if (doc.all_names_alpha_ss.length > 0) {
+                        syns = `
+                         <div style="margin-top: 0.3em;">
+                        <strong>Synonyms: </strong>
+                        ${doc.all_names_alpha_ss.map(syn => {
+                            // we need to highlight the search terms if they are found in the  synonyms
+                            highlighted = syn.replace(re, `<strong class="syn_highlight">${search_terms}</strong>`);
+                            return highlighted;
+                        }).join('; ')};
                         </div>
-                    </li>`;
+                        `;
+                    }
+
+                    return `<li style="list-style-type: none;margin-bottom: 0.6em;">
+                        <a href="taxon.php?id=${doc.id}">${doc.full_name_string_html_s}</a>
+                        ${syns}
+                        <div style="margin-top: 0.3em;">
+                        <strong>Path:</strong>${doc.name_path_s}
+                        </div>
+                    </li>`
                 }).join('')
                     }
                 </ul > `;
+            } else {
+                // no docs returned
+                results_wrapper.innerHTML = "<p>No taxa were found matching your query.</p>"
             }// got some docs
 
-            //document.getElementById('search_results').innerHTML = json
+            // now populate the facets check boxes
+            let facets_html = [];
+            console.log(json.getParams);
+            const formatter = new Intl.NumberFormat('en'); // FIXME pull this from session
+
+            for (const [facet_name, facet] of Object.entries(json.facets)) {
+                if (facet_name == 'count') continue; // ignore the total count
+
+                const facet_checkboxes = facet.buckets.map(fv => {
+
+                    const value_name = `${facet_name}_${fv.val}`;
+                    return `<li style="list-style-type: none;">
+                        <input 
+                        type="checkbox" 
+                        name="${value_name}"
+                        value="checked"
+                        onchange="search_param_change(this)" 
+                        ${json.getParams.hasOwnProperty(value_name) ? 'checked' : ''}
+                         />
+                        ${label_map[fv.val].label} (${formatter.format(fv.count)})
+                        </li>`;
+                });
+
+                const facet_html = `
+                    <h3>${label_map[facet_name].label}</h3>
+                    <ul>
+                    ${facet_checkboxes.join('')}
+                    </ul>
+                `;
+
+                facets_html.push(facet_html);
+            }
+
+
+            facets_wrapper.innerHTML = facets_html.join('');
+
+
         });
 
 }
@@ -85,7 +133,9 @@ function initialize_form() {
     const form = document.getElementById("main_form");
     const params = new URLSearchParams(document.cookie.substring(7));
     const entries = params.entries();
+
     for (const [key, val] of entries) {
+        console.log(`${key} - ${val}`);
         //http://javascript-coder.com/javascript-form/javascript-form-value.phtml
         const input = form.elements[key];
         switch (input.type) {

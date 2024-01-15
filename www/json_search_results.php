@@ -62,12 +62,19 @@ $query = array(
         'full_name_string_html_s',
         'role_s',
         'all_names_alpha_ss',
+        'name_path_s',
         'facet'
     ),
-    'sort' => 'full_name_string_alpha_t_sort asc',
+    'sort' => "strdist(\"$name\",full_name_string_alpha_s,edit) desc, full_name_string_alpha_s asc",
     'facet' => $facets,
     'limit' => 10
 );
 
 header("Content-Type: application/json");
-echo json_encode($index->getSolrResponse($query));
+
+// we add the original form values into the response
+// from solr so we can repopulate the form easily.
+$solr_response = $index->getSolrResponse($query);
+$solr_response->getParams = $_GET;
+
+echo json_encode($solr_response);
